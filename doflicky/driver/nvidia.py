@@ -33,9 +33,31 @@ class DriverBundleNvidiaBase(DriverBundlePCI):
         """ For GPU drivers we'll suggest 32-bit when we find related pkgs """
         return ["wine-32bit", "steam", "mesalib-32bit"]
 
+class DriverBundleNvidiaOpen(DriverBundleNvidiaBase):
+    """ Main NVIDIA driver, open kernel modules (nvidia-open) """
+
+    def __init__(self):
+        DriverBundleNvidiaBase.__init__(self, "nvidia-open.modaliases")
+
+    def get_name(self):
+        return "NVIDIA Graphics Driver (main series, open kernel modules)"
+
+    def get_priority(self):
+        return 3
+
+    def get_packages(self, context, emul32=False):
+        basePackages = ["nvidia-glx-driver-common"]
+        if emul32:
+            basePackages.append("nvidia-glx-driver-32bit")
+        if context.get_active_kernel_series() == "current":
+            basePackages.append("nvidia-open-current")
+        else:
+            basePackages.append("nvidia-open")
+        return basePackages
+
 
 class DriverBundleNvidia(DriverBundleNvidiaBase):
-    """ Main NVIDIA driver (nvidia-glx-driver) """
+    """ Main NVIDIA driver, proprietary kernel modules (nvidia-glx-driver) """
 
     def __init__(self):
         DriverBundleNvidiaBase.__init__(self, "nvidia-glx-driver.modaliases")
@@ -44,7 +66,7 @@ class DriverBundleNvidia(DriverBundleNvidiaBase):
         return "NVIDIA Graphics Driver (main series)"
 
     def get_priority(self):
-        return 3
+        return 2
 
     def get_packages(self, context, emul32=False):
         basePackages = ["nvidia-glx-driver-common"]
